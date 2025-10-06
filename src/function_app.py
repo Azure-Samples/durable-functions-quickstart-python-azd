@@ -19,7 +19,7 @@ async def http_start(req: func.HttpRequest, client):
 
 
 @myApp.orchestration_trigger(context_name="context")
-def fetch_orchestration(context: df.DurableOrchestrationContext):
+def FetchOrchestration(context: df.DurableOrchestrationContext):
     """Orchestrator function that fans out to fetch article titles in parallel."""
     logger = logging.getLogger("FetchOrchestration")
     logger.info("Fetching data.")

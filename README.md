@@ -104,11 +104,11 @@ The Functions runtime requires a storage component. The line `"AzureWebJobsStora
 ## Source Code
 Fanning out is easy to do with regular functions, simply send multiple messages to a queue. However, fanning in is more challenging, because you need to track when all the functions are completed and store the outputs.
 
-Durable Functions makes implementing fan-out/fan-in easy for you. This sample uses a simple scenario of fetching article titles in parallel to demonstrate how you can implement the pattern with Durable Functions. In `fetch_orchestration`, the title fetching activities are tracked using a dynamic task list. The line `yield context.task_all(tasks)` waits for all the called activities, which are run concurrently, to complete. When done, all outputs are aggregated as a formatted string. More sophisticated aggregation logic is probably required in real-world scenarios, such as uploading the result to storage or sending it downstream, which you can do by calling another activity function.
+Durable Functions makes implementing fan-out/fan-in easy for you. This sample uses a simple scenario of fetching article titles in parallel to demonstrate how you can implement the pattern with Durable Functions. In `FetchOrchestration`, the title fetching activities are tracked using a dynamic task list. The line `yield context.task_all(tasks)` waits for all the called activities, which are run concurrently, to complete. When done, all outputs are aggregated as a formatted string. More sophisticated aggregation logic is probably required in real-world scenarios, such as uploading the result to storage or sending it downstream, which you can do by calling another activity function.
 
 ```python
 @myApp.orchestration_trigger(context_name="context")
-def fetch_orchestration(context: df.DurableOrchestrationContext):
+def FetchOrchestration(context: df.DurableOrchestrationContext):
     """Orchestrator function that fans out to fetch article titles in parallel."""
     logger = logging.getLogger("FetchOrchestration")
     logger.info("Fetching data.")
