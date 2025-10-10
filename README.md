@@ -215,3 +215,11 @@ When you're done working with your function app and related resources, you can u
 ```shell
 azd down
 ```
+
+## Troubleshooting
+
+If you get the following error after running `azd up`, it's a transient error. Run the command again. 
+
+    ```
+    ERROR: error executing step command 'deploy --all': failed deploying service 'api': publishing zip file: deployment failed: [KuduSpecializer] Kudu has been restarted during deployment    
+    ```
