@@ -198,7 +198,12 @@ Once deployment is done, test the Durable Functions app by making an HTTP reques
     az functionapp function list --resource-group <resource-group-name> --name <function-app-name> --query "[].{name:name, url:invokeUrlTemplate}" --output table
     ```
 
-    The _function-app-name/http_start_ is the endpoint, and it should look like `https://<function-app-name>.azurewebsites.net/api/orchestrators/{functionname}`. Remember to replace the function name with `fetch_orchestration`.
+The _function-app-name/http_start_ is the endpoint, and it should look like:
+ 
+ ```
+ https://<function-app-name>.azurewebsites.net/api/orchestrators/{functionname}
+ ```
+Remember to replace the function name with `fetch_orchestration`.
     
 
 ## Redeploy your code
