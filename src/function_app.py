@@ -7,11 +7,12 @@ from aiohttp import ClientSession
 myApp = df.DFApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 
 
-@myApp.route(route="FetchOrchestration_HttpStart")
+@myApp.route(route="orchestrators/{functionName}")
 @myApp.durable_client_input(client_name="client")
 async def http_start(req: func.HttpRequest, client):
     """HTTP trigger to start the orchestration."""
-    instance_id = await client.start_new("FetchOrchestration")
+    function_name = req.route_params.get('functionName')
+    instance_id = await client.start_new(function_name)
     
     logging.info(f"Started orchestration with ID = '{instance_id}'.")
     
@@ -19,9 +20,9 @@ async def http_start(req: func.HttpRequest, client):
 
 
 @myApp.orchestration_trigger(context_name="context")
-def FetchOrchestration(context: df.DurableOrchestrationContext):
+def fetch_orchestration(context: df.DurableOrchestrationContext):
     """Orchestrator function that fans out to fetch article titles in parallel."""
-    logger = logging.getLogger("FetchOrchestration")
+    logger = logging.getLogger("fetch_orchestration")
     logger.info("Fetching data.")
     
     # List of URLs to fetch titles from
