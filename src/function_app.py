@@ -4,7 +4,7 @@ import azure.functions as func
 import azure.durable_functions as df
 from aiohttp import ClientSession
 
-myApp = df.DFApp(http_auth_level=func.AuthLevel.ANONYMOUS)
+myApp = df.DFApp(http_auth_level=func.AuthLevel.FUNCTION)
 
 
 @myApp.route(route="orchestrators/{functionName}")
