@@ -6,40 +6,17 @@ targetScope = 'subscription'
 param environmentName string
 
 @minLength(1)
-@description('Primary location for all resources & Flex Consumption Function App')
+@description('Primary location for all resources')
 @allowed([
   'australiaeast'
-  'australiasoutheast'
-  'brazilsouth'
-  'canadacentral'
-  'centralindia'
   'centralus'
   'eastasia'
-  'eastus'
   'eastus2'
-  'eastus2euap'
-  'francecentral'
-  'germanywestcentral'
-  'italynorth'
-  'japaneast'
-  'koreacentral'
-  'northcentralus'
   'northeurope'
-  'norwayeast'
-  'southafricanorth'
-  'southcentralus'
   'southeastasia'
-  'southindia'
-  'spaincentral'
   'swedencentral'
-  'uaenorth'
   'uksouth'
-  'ukwest'
-  'westcentralus'
-  'westeurope'
-  'westus'
   'westus2'
-  'westus3'
 ])
 @metadata({
   azd: {
@@ -56,6 +33,10 @@ param logAnalyticsName string = ''
 param resourceGroupName string = ''
 param storageAccountName string = ''
 param vNetName string = ''
+param dtsName string = ''
+param taskHubName string = ''
+param dtsLocation string = location
+param dtsSkuName string = 'Consumption'
 @description('Id of the user identity to be used for testing and debugging. This is not required in production. Leave empty if not needed.')
 param principalId string = deployer().objectId
 
@@ -63,6 +44,8 @@ var abbrs = loadJsonContent('./abbreviations.json')
 var resourceToken = toLower(uniqueString(subscription().id, environmentName, location))
 var tags = { 'azd-env-name': environmentName }
 var functionAppName = !empty(apiServiceName) ? apiServiceName : '${abbrs.webSitesFunctions}api-${resourceToken}'
+var dtsResourceName = !empty(dtsName) ? dtsName : '${abbrs.durableTaskSchedulers}${resourceToken}'
+var taskHubResourceName = !empty(taskHubName) ? taskHubName : '${abbrs.durableTaskHubs}${resourceToken}'
 var deploymentStorageContainerName = 'app-package-${take(functionAppName, 32)}-${take(toLower(uniqueString(functionAppName, resourceToken)), 7)}'
 
 // Organize resources in a resource group
@@ -121,6 +104,8 @@ module api './app/api.bicep' = {
     appSettings: {
     }
     virtualNetworkSubnetId: vnetEnabled ? serviceVirtualNetwork.outputs.appSubnetID : ''
+    dtsURL: dts.outputs.dts_URL
+    taskHubName: dts.outputs.TASKHUB_NAME
   }
 }
 
@@ -153,8 +138,8 @@ module storage 'br/public:avm/res/storage/storage-account:0.8.3' = {
 // Define the configuration object locally to pass to the modules
 var storageEndpointConfig = {
   enableBlob: true  // Required for AzureWebJobsStorage, .zip deployment, Event Hubs trigger and Timer trigger checkpointing
-  enableQueue: true  // Required for Durable Functions and MCP trigger
-  enableTable: true  // Required for Durable Functions and OpenAI triggers and bindings
+  enableQueue: true   // Required for AzureWebJobsStorage host operations and non-Durable triggers/bindings
+  enableTable: true   // Required for AzureWebJobsStorage host operations and non-Durable triggers/bindings
   enableFiles: false   // Not required, used in legacy scenarios
   allowUserIdentityPrincipal: true   // Allow interactive user identity to access for testing and debugging
 }
@@ -225,8 +210,50 @@ module monitoring 'br/public:avm/res/insights/component:0.6.0' = {
   }
 }
 
+// Durable Task Scheduler
+module dts './app/dts.bicep' = {
+  scope: rg
+  name: 'dtsResource'
+  params: {
+    name: dtsResourceName
+    taskhubname: taskHubResourceName
+    location: dtsLocation
+    tags: tags
+    ipAllowlist: [
+      '0.0.0.0/0'
+    ]
+    skuName: dtsSkuName
+  }
+}
+
+// Durable Task Data Contributor role ID
+var dtsRoleDefinitionId = '0ad04412-c4d5-4796-b79c-f76d14c8d402'
+
+// Allow access from function app to DTS using user assigned managed identity
+module dtsRoleAssignment 'app/dts-Access.bicep' = {
+  name: 'dtsRoleAssignment'
+  scope: rg
+  params: {
+    roleDefinitionID: dtsRoleDefinitionId
+    principalID: apiUserAssignedIdentity.outputs.principalId
+    principalType: 'ServicePrincipal'
+    dtsName: dts.outputs.dts_NAME
+  }
+}
+
+// Allow the deployer identity to access the DTS dashboard
+module dtsDashboardRoleAssignment 'app/dts-Access.bicep' = {
+  name: 'dtsDashboardRoleAssignment'
+  scope: rg
+  params: {
+    roleDefinitionID: dtsRoleDefinitionId
+    principalID: principalId
+    principalType: 'User'
+    dtsName: dts.outputs.dts_NAME
+  }
+}
+
 // App outputs
-output APPLICATIONINSIGHTS_CONNECTION_STRING string = monitoring.outputs.name
 output AZURE_LOCATION string = location
 output AZURE_TENANT_ID string = tenant().tenantId
 output SERVICE_API_NAME string = api.outputs.SERVICE_API_NAME
