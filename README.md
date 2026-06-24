@@ -61,6 +61,7 @@ This sample uses a remote Durable Task Scheduler (DTS) resource in Azure as the 
 Run this command to provision the required Azure resources, including the DTS instance:
 
 ```shell
+azd auth login
 azd provision
 ```
 
@@ -105,13 +106,13 @@ pip install -r requirements.txt
 
 ## Run your app from the terminal
 
-1. In a new terminal, start the Azurite storage emulator. The Functions runtime requires a storage component for internal state management:
+1. Start the Azurite storage emulator. The Functions runtime requires a storage component for internal state management:
 
     ```shell
     azurite
     ```
 
-1. From the `src` folder in the existing `.venv`, start the Functions host:
+1. In a separate terminal, navigate to the `src` folder with the virtual environment activated, and start the Functions host:
 
     ```shell
     func start
@@ -170,7 +171,7 @@ pip install -r requirements.txt
 
 ## Deploy to Azure
 
-After you've verified the app works locally, deploy your code to the provisioned function app in Azure:
+After you've verified the app works locally, deploy your code from the project root to the provisioned function app in Azure:
 
 ```shell
 azd deploy
