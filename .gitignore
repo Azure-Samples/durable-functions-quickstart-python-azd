@@ -54,6 +54,17 @@ env/
 *.swo
 *~
 
+# Azurite
+__azurite_db_blob__.json
+__azurite_db_blob_extent__.json
+__azurite_db_queue__.json
+__azurite_db_queue_extent__.json
+__azurite_db_table__.json
+__azurite_db_table_extent__.json
+__blobstorage__/
+__queuestorage__/
+__tablestorage__/
+
 # OS files
 .DS_Store
 Thumbs.db
@@ -70,3 +81,7 @@ Thumbs.db
 
 # Azurite data
 azurite-data/
+__azurite_db_*
+__blobstorage__/
+__queuestorage__/
+AzuriteConfig
