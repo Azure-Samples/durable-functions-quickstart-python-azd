@@ -3,5 +3,6 @@
     "azureFunctions.scmDoBuildDuringDeployment": true,
     "azureFunctions.projectLanguage": "Python",
     "azureFunctions.projectRuntime": "~4",
-    "python.defaultInterpreterPath": "src/.venv/bin/python"
+    "azureFunctions.pythonVenv": ".venv",
+    "python.defaultInterpreterPath": "${workspaceFolder}/src/.venv"
 }

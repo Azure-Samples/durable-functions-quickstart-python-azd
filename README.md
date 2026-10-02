@@ -165,6 +165,11 @@ pip install -r requirements.txt
 ## Run your app using Visual Studio Code
 
 1. Open the repository folder in VS Code (`code .`).
+1. Create `src/.venv` using the [virtual environment instructions](#create-and-activate-a-virtual-environment) above.
+   The dependency and Functions tasks both run from `src` and use this environment.
+   If another interpreter was previously selected for this workspace, run
+   **Python: Select Interpreter** and select `src/.venv`; the default interpreter
+   setting does not replace an existing selection.
 1. Ensure Azurite is running, as described above.
 1. Press **Run/Debug (F5)** to start the app in the debugger.
 1. Trigger the orchestration with an HTTP request to <http://localhost:7071/api/orchestrators/fetch_orchestration>.
